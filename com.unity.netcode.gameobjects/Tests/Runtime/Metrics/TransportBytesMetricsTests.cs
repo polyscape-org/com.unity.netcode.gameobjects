@@ -90,7 +90,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
             private int m_BytesFoundCounter;
             private long m_TotalBytes;
 
-            public void Observe(MetricCollection collection)
+            public void Observe(IMetricCollection collection)
             {
                 if (collection.TryGetCounter(m_MetricInfo.Id, out var counter) && counter.Value > 0)
                 {

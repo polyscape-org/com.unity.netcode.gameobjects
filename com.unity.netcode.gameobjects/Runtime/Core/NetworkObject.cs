@@ -1107,6 +1107,7 @@ namespace Unity.Netcode
         internal readonly HashSet<ulong> Observers = new HashSet<ulong>();
 
 #if MULTIPLAYER_TOOLS
+        //TODO: store as FixedString64?
         private string m_CachedNameForMetrics;
 #endif
         internal string GetNameForMetrics()

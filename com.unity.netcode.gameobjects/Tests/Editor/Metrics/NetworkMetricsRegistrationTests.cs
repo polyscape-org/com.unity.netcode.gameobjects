@@ -24,7 +24,7 @@ namespace Unity.Netcode.EditorTests.Metrics
 
             var collection = typeof(MetricDispatcher)
                 .GetField("m_Collection", BindingFlags.NonPublic | BindingFlags.Instance)?
-                .GetValue(dispatcher) as MetricCollection;
+                .GetValue(dispatcher) as IMetricCollection;
             Assert.NotNull(collection);
 
             Assert.That(

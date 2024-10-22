@@ -12,7 +12,7 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
         public int GetRpcCount(ObjectId objectId) =>
             m_MostRecentRpcCount.TryGetValue(objectId, out var bandwidth) ? bandwidth : 0;
 
-        public void Update(MetricCollection collection)
+        public void Update(IMetricCollection collection)
         {
             m_MostRecentRpcCount.Clear();
 
@@ -20,7 +20,7 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
             LookupAndCountRpcs(collection, DirectedMetricType.RpcReceived);
         }
 
-        private void LookupAndCountRpcs(MetricCollection collection, DirectedMetricType metricType)
+        private void LookupAndCountRpcs(IMetricCollection collection, DirectedMetricType metricType)
         {
             var metricId = MetricId.Create(metricType);
             var events = collection.TryGetEvent<RpcEvent>(metricId, out var metric)

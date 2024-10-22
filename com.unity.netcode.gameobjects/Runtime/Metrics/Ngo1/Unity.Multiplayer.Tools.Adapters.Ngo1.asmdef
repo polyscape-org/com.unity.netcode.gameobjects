@@ -10,6 +10,7 @@
     "Unity.Multiplayer.Tools.Interfaces",
     "Unity.Multiplayer.Tools.Interfaces.MetricTypes", 
     "Unity.Multiplayer.Tools.MetricCollection",
+    "Unity.Multiplayer.Tools.BuiltInMetrics",
     "Unity.Multiplayer.Tools.ReaderWriters"
   ],
   "includePlatforms": [],

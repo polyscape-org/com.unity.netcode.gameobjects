@@ -35,7 +35,7 @@ namespace Unity.Netcode.TestHelpers.Runtime.Metrics
             return m_Value;
         }
 
-        public override void Observe(MetricCollection collection)
+        public override void Observe(IMetricCollection collection)
         {
             if (FindMetric(collection, out var metric))
             {

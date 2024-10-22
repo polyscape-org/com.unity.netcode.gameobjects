@@ -8,7 +8,8 @@
         "Unity.Multiplayer.Tools.MetricTypes",
         "Unity.Multiplayer.Tools.Dispatcher",
         "Unity.Multiplayer.Tools.MetricCollection",
-        "Unity.Multiplayer.Tools.Adapters.Ngo1"
+        "Unity.Multiplayer.Tools.Adapters.Ngo1",
+      "Unity.Multiplayer.Tools.BuiltInMetrics"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"

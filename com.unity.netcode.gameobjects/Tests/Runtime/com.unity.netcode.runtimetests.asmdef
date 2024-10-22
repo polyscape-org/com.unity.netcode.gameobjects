@@ -16,7 +16,9 @@
         "Unity.Mathematics",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-      "Unity.Multiplayer.Tools.Adapters.Ngo1"
+      "Unity.Multiplayer.Tools.Adapters.Ngo1",
+      "Unity.Multiplayer.Tools.BuiltInMetrics"
+      
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

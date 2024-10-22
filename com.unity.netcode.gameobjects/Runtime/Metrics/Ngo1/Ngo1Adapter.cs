@@ -233,7 +233,7 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
         public event Action<IMetricCollection> MetricCollectionEvent;
 
 
-        public void Observe(MetricCollection collection)
+        public void Observe(IMetricCollection collection)
         {
             UpdateNetworkTrafficCaches(collection);
             MetricCollectionEvent?.Invoke(collection as IMetricCollection);
@@ -272,7 +272,7 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
         private ObjectBandwidthCache m_BandwidthCache;
         private ObjectRpcCountCache m_RpcCountCache;
 
-        private void UpdateNetworkTrafficCaches(MetricCollection metricCollection)
+        private void UpdateNetworkTrafficCaches(IMetricCollection metricCollection)
         {
             if (m_OnBandwidthUpdated != null)
             {

@@ -57,7 +57,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
                 m_OnObserve = onObserve;
             }
 
-            public void Observe(MetricCollection collection)
+            public void Observe(IMetricCollection collection)
             {
                 m_OnObserve?.Invoke();
             }

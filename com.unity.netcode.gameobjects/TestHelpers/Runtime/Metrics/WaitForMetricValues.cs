@@ -21,7 +21,7 @@ namespace Unity.Netcode.TestHelpers.Runtime.Metrics
             dispatcher.RegisterObserver(this);
         }
 
-        abstract public void Observe(MetricCollection collection);
+        public abstract void Observe(IMetricCollection collection);
 
         public void AssertMetricValuesHaveNotBeenFound()
         {
@@ -61,7 +61,7 @@ namespace Unity.Netcode.TestHelpers.Runtime.Metrics
             }
         }
 
-        protected bool FindMetric(MetricCollection collection, out IMetric metric)
+        protected bool FindMetric(IMetricCollection collection, out IMetric metric)
         {
             if (m_Found || m_HasError)
             {

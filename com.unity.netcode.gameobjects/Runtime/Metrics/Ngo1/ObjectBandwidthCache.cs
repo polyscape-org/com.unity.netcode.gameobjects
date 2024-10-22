@@ -39,7 +39,7 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
 
         private static readonly NetworkDirection[] k_SentAndReceived = { NetworkDirection.Sent, NetworkDirection.Received };
 
-        public void Update(MetricCollection collection)
+        public void Update(IMetricCollection collection)
         {
             IsCold = false;
             m_OtherBandwidth.Clear();
@@ -57,7 +57,7 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
         }
 
         private static void LookupAndCountBytes<TEvent>(
-            MetricCollection collection,
+            IMetricCollection collection,
             NetworkDirection direction,
             MetricType metricType,
             Dictionary<ObjectId, BytesSentAndReceived> bandwidthBuffer)
