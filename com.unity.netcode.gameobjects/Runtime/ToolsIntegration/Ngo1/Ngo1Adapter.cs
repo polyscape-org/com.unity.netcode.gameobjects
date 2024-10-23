@@ -42,7 +42,6 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
 
         public Ngo1Adapter([NotNull] NetworkManager networkManager, [NotNull] IMetricDispatcher dispatcher)
         {
-            DebugUtil.TraceMethodName();
             Debug.Assert(networkManager != null, $"The parameter {nameof(networkManager)} can't be null.");
             Init(networkManager);
             dispatcher.RegisterObserver(this);

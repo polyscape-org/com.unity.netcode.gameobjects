@@ -2,7 +2,6 @@
     "name": "Unity.Multiplayer.Tools.Adapters.Ngo1WithUtp2",
     "rootNamespace": "Unity.Multiplayer.Tools.Adapters.NgoWithUtp2",
     "references": [
-        "Unity.Multiplayer.Tools.Adapters",
         "Unity.Networking.Transport",
         "Unity.Netcode.Runtime",
         "Unity.Multiplayer.Tools.Adapters.Utp2",

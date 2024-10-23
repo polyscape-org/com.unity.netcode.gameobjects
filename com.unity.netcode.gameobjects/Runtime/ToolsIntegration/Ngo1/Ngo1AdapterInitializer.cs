@@ -1,5 +1,5 @@
+using System;
 using System.Threading.Tasks;
-using Unity.Multiplayer.Tools.Common;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Scripting;
@@ -60,6 +60,35 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
             }
 
             return NetworkManager.Singleton;
+        }
+
+
+        // Copied from Tools.Common to avoid remove dependency for a single function
+         public static void Forget(this Task task)
+        {
+            if (!task.IsCompleted || task.IsFaulted)
+            {
+                _ = ForgetAwaited(task);
+            }
+
+            static async Task ForgetAwaited(Task task, bool logCanceledTask = false)
+            {
+                try
+                {
+                    await task.ConfigureAwait(false);
+                }
+                catch (TaskCanceledException exception)
+                {
+                    if (logCanceledTask)
+                    {
+                        Debug.LogException(exception);
+                    }
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogException(exception);
+                }
+            }
         }
     }
 }
