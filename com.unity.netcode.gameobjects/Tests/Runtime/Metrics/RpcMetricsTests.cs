@@ -20,7 +20,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator TrackRpcSentMetricOnServerToOnlyOneClientWithArray()
         {
-            var waitForMetricValues = new WaitForEventMetricValues<RpcEvent>(ServerMetrics.Dispatcher, NetworkMetricTypes.RpcSent);
+            var waitForMetricValues = new WaitForEventMetricValues<RpcEvent>(ServerMetricsDispatcher, NetworkMetricTypes.RpcSent);
 
             m_PlayerNetworkObjects[m_ServerNetworkManager.LocalClientId][FirstClient.LocalClientId].GetComponent<RpcTestComponent>().MyClientRpc(new ClientRpcParams
             {
@@ -44,7 +44,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator TrackRpcSentMetricOnServerToOnlyOneClientWithNativeArray()
         {
-            var waitForMetricValues = new WaitForEventMetricValues<RpcEvent>(ServerMetrics.Dispatcher, NetworkMetricTypes.RpcSent);
+            var waitForMetricValues = new WaitForEventMetricValues<RpcEvent>(ServerMetricsDispatcher, NetworkMetricTypes.RpcSent);
 
             m_PlayerNetworkObjects[m_ServerNetworkManager.LocalClientId][FirstClient.LocalClientId].GetComponent<RpcTestComponent>().MyClientRpc(new ClientRpcParams
             {
@@ -68,7 +68,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator TrackRpcSentMetricOnServerToAllClients()
         {
-            var waitForMetricValues = new WaitForEventMetricValues<RpcEvent>(ServerMetrics.Dispatcher, NetworkMetricTypes.RpcSent);
+            var waitForMetricValues = new WaitForEventMetricValues<RpcEvent>(ServerMetricsDispatcher, NetworkMetricTypes.RpcSent);
 
             m_PlayerNetworkObjects[m_ServerNetworkManager.LocalClientId][FirstClient.LocalClientId].GetComponent<RpcTestComponent>().MyClientRpc();
 
@@ -88,7 +88,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator TrackRpcSentMetricOnClient()
         {
-            var waitForClientMetricsValues = new WaitForEventMetricValues<RpcEvent>(FirstClientMetrics.Dispatcher, NetworkMetricTypes.RpcSent);
+            var waitForClientMetricsValues = new WaitForEventMetricValues<RpcEvent>(FirstClientMetricsDispatcher, NetworkMetricTypes.RpcSent);
 
             m_PlayerNetworkObjects[FirstClient.LocalClientId][FirstClient.LocalClientId].GetComponent<RpcTestComponent>().MyServerRpc();
 
@@ -107,7 +107,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator TrackRpcReceivedMetricOnServer()
         {
-            var waitForServerMetricsValues = new WaitForEventMetricValues<RpcEvent>(ServerMetrics.Dispatcher, NetworkMetricTypes.RpcReceived);
+            var waitForServerMetricsValues = new WaitForEventMetricValues<RpcEvent>(ServerMetricsDispatcher, NetworkMetricTypes.RpcReceived);
             m_PlayerNetworkObjects[FirstClient.LocalClientId][FirstClient.LocalClientId].GetComponent<RpcTestComponent>().MyServerRpc();
 
             yield return waitForServerMetricsValues.WaitForMetricsReceived();
@@ -125,7 +125,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator TrackRpcReceivedMetricOnClient()
         {
-            var waitForClientMetricsValues = new WaitForEventMetricValues<RpcEvent>(FirstClientMetrics.Dispatcher, NetworkMetricTypes.RpcReceived);
+            var waitForClientMetricsValues = new WaitForEventMetricValues<RpcEvent>(FirstClientMetricsDispatcher, NetworkMetricTypes.RpcReceived);
 
             m_PlayerNetworkObjects[m_ServerNetworkManager.LocalClientId][FirstClient.LocalClientId].GetComponent<RpcTestComponent>().MyClientRpc();
 

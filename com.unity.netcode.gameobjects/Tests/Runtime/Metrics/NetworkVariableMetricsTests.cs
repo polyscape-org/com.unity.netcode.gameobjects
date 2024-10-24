@@ -19,7 +19,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator TrackNetworkVariableDeltaSentMetric()
         {
-            var waitForMetricValues = new WaitForEventMetricValues<NetworkVariableEvent>(ServerMetrics.Dispatcher, NetworkMetricTypes.NetworkVariableDeltaSent);
+            var waitForMetricValues = new WaitForEventMetricValues<NetworkVariableEvent>(ServerMetricsDispatcher, NetworkMetricTypes.NetworkVariableDeltaSent);
 
             yield return waitForMetricValues.WaitForMetricsReceived();
 
@@ -41,7 +41,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator TrackNetworkVariableDeltaReceivedMetric()
         {
-            var waitForMetricValues = new WaitForEventMetricValues<NetworkVariableEvent>(ClientMetrics.Dispatcher, NetworkMetricTypes.NetworkVariableDeltaReceived);
+            var waitForMetricValues = new WaitForEventMetricValues<NetworkVariableEvent>(ClientMetricsDispatcher, NetworkMetricTypes.NetworkVariableDeltaReceived);
 
             yield return waitForMetricValues.WaitForMetricsReceived();
 

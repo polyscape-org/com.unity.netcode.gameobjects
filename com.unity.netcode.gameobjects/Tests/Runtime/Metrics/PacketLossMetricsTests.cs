@@ -45,9 +45,8 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator TrackPacketLossAsServer()
         {
-            var waitForPacketLossMetric = new WaitForGaugeMetricValues((m_ServerNetworkManager.NetworkMetrics as NetworkMetrics).Dispatcher,
-                NetworkMetricTypes.PacketLoss,
-                metric => metric == 0.0d);
+            var dispatcher = new TestDispatcher((NetworkMetrics)m_ServerNetworkManager.NetworkMetrics);
+            var waitForPacketLossMetric = new WaitForGaugeMetricValues(dispatcher, NetworkMetricTypes.PacketLoss, metric => metric == 0.0d);
 
             for (int i = 0; i < 1000; ++i)
             {
@@ -76,9 +75,8 @@ namespace Unity.Netcode.RuntimeTests.Metrics
             clientTransport.NetworkDriver.ModifySimulatorStageParameters(parameters);
 #endif
 
-            var waitForPacketLossMetric = new WaitForGaugeMetricValues((clientNetworkManager.NetworkMetrics as NetworkMetrics).Dispatcher,
-                NetworkMetricTypes.PacketLoss,
-                metric => packetLossRateMinRange <= metric && metric <= packetLossRateMaxrange);
+            var dispatcher = new TestDispatcher((NetworkMetrics) clientNetworkManager.NetworkMetrics);
+            var waitForPacketLossMetric = new WaitForGaugeMetricValues(dispatcher, NetworkMetricTypes.PacketLoss, metric => packetLossRateMinRange <= metric && metric <= packetLossRateMaxrange);
 
             for (int i = 0; i < 1000; ++i)
             {

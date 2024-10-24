@@ -40,7 +40,8 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator UpdateConnectionCountOnServer()
         {
-            var waitForGaugeValues = new WaitForGaugeMetricValues((m_ServerNetworkManager.NetworkMetrics as NetworkMetrics).Dispatcher, NetworkMetricTypes.ConnectedClients);
+            var dispatcher = new TestDispatcher((NetworkMetrics)m_ServerNetworkManager.NetworkMetrics);
+            var waitForGaugeValues = new WaitForGaugeMetricValues(dispatcher, NetworkMetricTypes.ConnectedClients);
 
             yield return waitForGaugeValues.WaitForMetricsReceived();
 
@@ -53,7 +54,8 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         {
             foreach (var clientNetworkManager in m_ClientNetworkManagers)
             {
-                var waitForGaugeValues = new WaitForGaugeMetricValues((clientNetworkManager.NetworkMetrics as NetworkMetrics).Dispatcher, NetworkMetricTypes.ConnectedClients);
+                var dispatcher = new TestDispatcher((NetworkMetrics)m_ServerNetworkManager.NetworkMetrics);
+                var waitForGaugeValues = new WaitForGaugeMetricValues(dispatcher, NetworkMetricTypes.ConnectedClients);
 
                 yield return waitForGaugeValues.WaitForMetricsReceived();
 

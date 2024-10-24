@@ -39,7 +39,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         {
             // Set the client NetworkManager to assure the log is sent
             NetworkLog.NetworkManagerOverride = Client;
-            var waitForSentMetric = new WaitForEventMetricValues<ServerLogEvent>(ClientMetrics.Dispatcher, NetworkMetricTypes.ServerLogSent);
+            var waitForSentMetric = new WaitForEventMetricValues<ServerLogEvent>(ClientMetricsDispatcher, NetworkMetricTypes.ServerLogSent);
 
             var message = Guid.NewGuid().ToString();
             Client.LogLevel = LogLevel.Developer;
@@ -63,7 +63,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator TrackServerLogReceivedMetric()
         {
-            var waitForReceivedMetric = new WaitForEventMetricValues<ServerLogEvent>(ServerMetrics.Dispatcher, NetworkMetricTypes.ServerLogReceived);
+            var waitForReceivedMetric = new WaitForEventMetricValues<ServerLogEvent>(ServerMetricsDispatcher, NetworkMetricTypes.ServerLogReceived);
 
             var message = Guid.NewGuid().ToString();
             Client.LogLevel = LogLevel.Developer;

@@ -5,6 +5,7 @@ using NUnit.Framework;
 using Unity.Multiplayer.Tools.NetStats;
 using UnityEngine.TestTools;
 using Unity.Netcode.TestHelpers.Runtime;
+using Unity.Netcode.TestHelpers.Runtime.Metrics;
 
 namespace Unity.Netcode.RuntimeTests.Metrics
 {
@@ -26,8 +27,9 @@ namespace Unity.Netcode.RuntimeTests.Metrics
                 });
             Assert.IsTrue(networkManagerStarted);
 
-            var networkMetrics = m_NetworkManager.NetworkMetrics as NetworkMetrics;
-            networkMetrics.Dispatcher.RegisterObserver(new MockMetricsObserver(() => m_NbDispatches++));
+            var networkMetrics = (NetworkMetrics)m_NetworkManager.NetworkMetrics;
+            var dispatcher = new TestDispatcher(networkMetrics);
+            dispatcher.RegisterObserver(new MockMetricsObserver(() => m_NbDispatches++));
         }
 
         [TearDown]

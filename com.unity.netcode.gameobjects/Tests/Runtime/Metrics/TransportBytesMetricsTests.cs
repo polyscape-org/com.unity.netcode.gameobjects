@@ -21,7 +21,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         {
             var messageName = new ForceNetworkSerializeByMemcpy<Guid>(Guid.NewGuid());
             var writer = new FastBufferWriter(1300, Allocator.Temp);
-            var observer = new TotalBytesObserver(ClientMetrics.Dispatcher, NetworkMetricTypes.TotalBytesReceived);
+            var observer = new TotalBytesObserver(ClientMetrics, NetworkMetricTypes.TotalBytesReceived);
             try
             {
                 writer.WriteValueSafe(messageName);
@@ -49,7 +49,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         {
             var messageName = new ForceNetworkSerializeByMemcpy<Guid>(Guid.NewGuid());
             var writer = new FastBufferWriter(1300, Allocator.Temp);
-            var observer = new TotalBytesObserver(ClientMetrics.Dispatcher, NetworkMetricTypes.TotalBytesReceived);
+            var observer = new TotalBytesObserver(ClientMetrics, NetworkMetricTypes.TotalBytesReceived);
             try
             {
                 writer.WriteValueSafe(messageName);
@@ -72,15 +72,15 @@ namespace Unity.Netcode.RuntimeTests.Metrics
             Assert.AreEqual(((FastBufferWriter.GetWriteSize(messageName) + k_MessageOverhead) + 7) & ~7, observer.Value);
         }
 
-        private class TotalBytesObserver : IMetricObserver
+        private class TotalBytesObserver
         {
             private readonly DirectionalMetricInfo m_MetricInfo;
 
-            public TotalBytesObserver(IMetricDispatcher dispatcher, DirectionalMetricInfo metricInfo)
+            public TotalBytesObserver(NetworkMetrics dispatcher, DirectionalMetricInfo metricInfo)
             {
                 m_MetricInfo = metricInfo;
 
-                dispatcher.RegisterObserver(this);
+                dispatcher.OnMetricsDispatched += Observe;
             }
 
             public bool Found { get; private set; }

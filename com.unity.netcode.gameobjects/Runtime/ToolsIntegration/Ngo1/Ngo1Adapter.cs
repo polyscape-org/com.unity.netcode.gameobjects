@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using Unity.Multiplayer.Tools.Common;
 using Unity.Multiplayer.Tools.DataCollection;
 using Unity.Multiplayer.Tools.Events;
-using Unity.Multiplayer.Tools.MetricEvents;
 using Unity.Multiplayer.Tools.NetStats;
 using Unity.Netcode;
 using UnityEngine;
@@ -14,7 +13,7 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
 {
     internal class Ngo1Adapter
 
-        : INetworkAdapter, IMetricObserver
+        : INetworkAdapter
 
         // Events
         // --------------------------------------------------------------------
@@ -34,22 +33,32 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
         [NotNull]
         private NetworkManager m_NetworkManager;
 
+        private DefaultMetricCollection m_Collection;
+
         [MaybeNull]
         private NetworkSpawnManager SpawnManager => m_NetworkManager.SpawnManager;
 
         [MaybeNull]
         private Dictionary<ulong, NetworkObject> SpawnedObjects => SpawnManager?.SpawnedObjects;
 
-        public Ngo1Adapter([NotNull] NetworkManager networkManager, [NotNull] IMetricDispatcher dispatcher)
+        public Ngo1Adapter([NotNull] NetworkManager networkManager)
         {
             Debug.Assert(networkManager != null, $"The parameter {nameof(networkManager)} can't be null.");
             Init(networkManager);
-            dispatcher.RegisterObserver(this);
         }
 
         private void Init(NetworkManager networkManager)
         {
             m_NetworkManager = networkManager;
+            if(m_NetworkManager.NetworkMetrics is NetworkMetrics nm)
+            {
+                m_Collection = nm.Collector;
+                nm.OnMetricsDispatched += NotifyObservers;
+            }
+            else
+            {
+                Debug.LogWarning("Ngo1Adapter: NetworkMetrics is either null or not of the expected type. Either make sure it is set properly or check the adapter implementation.");
+            }
             m_NetworkManager.OnConnectionEvent += OnConnectionEvent;
             m_NetworkManager.NetworkTickSystem.Tick += OnTick;
 
@@ -90,9 +99,14 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
             m_NetworkManager.OnServerStopped -= OnServerOrClientStopped;
             m_NetworkManager.OnClientStopped -= OnServerOrClientStopped;
 
-            m_NetworkManager = null;
-        }
+            if (m_NetworkManager.NetworkMetrics is NetworkMetrics nm)
+            {
+                nm.OnMetricsDispatched -= NotifyObservers;
+            }
 
+            m_NetworkManager = null;
+            m_Collection = null;
+        }
 
         private readonly List<ClientId> m_ClientIds = new();
         private readonly List<ObjectId> m_ObjectIds = new();
@@ -231,11 +245,11 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
 
         public event Action<IMetricCollection> MetricCollectionEvent;
 
-
-        public void Observe(IMetricCollection collection)
+        private void NotifyObservers(IMetricCollection collection)
         {
-            UpdateNetworkTrafficCaches(collection);
-            MetricCollectionEvent?.Invoke(collection as IMetricCollection);
+            OnBandwidthUpdated?.Invoke();
+            OnRpcCountUpdated?.Invoke();
+            MetricCollectionEvent?.Invoke(collection);
         }
 
         // Simple Queries
@@ -266,81 +280,25 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
             return 0;
         }
 
-        // Cached Queries
-        // --------------------------------------------------------------------
-        private ObjectBandwidthCache m_BandwidthCache;
-        private ObjectRpcCountCache m_RpcCountCache;
-
-        private void UpdateNetworkTrafficCaches(IMetricCollection metricCollection)
-        {
-            if (m_OnBandwidthUpdated != null)
-            {
-                m_BandwidthCache.Update(metricCollection);
-                m_OnBandwidthUpdated.Invoke();
-            }
-
-            if (m_OnRpcCountUpdated != null)
-            {
-                m_RpcCountCache.Update(metricCollection);
-                m_OnRpcCountUpdated.Invoke();
-            }
-        }
-
         // IGetBandwidth
         // --------------------------------------------------------------------
-        private event Action m_OnBandwidthUpdated;
-
-        public bool IsCacheEmpty => m_BandwidthCache == null || m_BandwidthCache.IsCold;
+        public bool IsCacheEmpty => m_Collection == null || m_Collection.HasNoBandwidthData;
 
         public BandwidthTypes SupportedBandwidthTypes =>
             BandwidthTypes.Other | BandwidthTypes.Rpc | BandwidthTypes.NetVar;
 
-        public event Action OnBandwidthUpdated
-        {
-            add
-            {
-                m_BandwidthCache ??= new();
-                m_OnBandwidthUpdated += value;
-            }
-            remove
-            {
-                m_OnBandwidthUpdated -= value;
-                if (m_OnBandwidthUpdated == null)
-                {
-                    m_BandwidthCache = null;
-                }
-            }
-        }
+        public event Action OnBandwidthUpdated;
 
         public float GetBandwidthBytes(
             ObjectId objectId,
             BandwidthTypes bandwidthTypes = BandwidthTypes.All,
             NetworkDirection networkDirection = NetworkDirection.SentAndReceived)
-            => m_BandwidthCache?.GetBandwidth(objectId, bandwidthTypes, networkDirection)
-                ?? throw new NoSubscribersException(nameof(IGetBandwidth), nameof(OnBandwidthUpdated));
+            => m_Collection.GetBandwidth(objectId, bandwidthTypes, networkDirection);
 
         // IGetRpcCount
         // --------------------------------------------------------------------
-        private event Action m_OnRpcCountUpdated;
-        public event Action OnRpcCountUpdated
-        {
-            add
-            {
-                m_RpcCountCache ??= new();
-                m_OnRpcCountUpdated += value;
-            }
-            remove
-            {
-                m_OnRpcCountUpdated -= value;
-                if (m_OnRpcCountUpdated == null)
-                {
-                    m_RpcCountCache = null;
-                }
-            }
-        }
+        public event Action OnRpcCountUpdated;
 
-        public int GetRpcCount(ObjectId objectId)
-            => m_RpcCountCache?.GetRpcCount(objectId)
-               ?? throw new NoSubscribersException(nameof(IGetRpcCount), nameof(OnRpcCountUpdated));
+        public int GetRpcCount(ObjectId objectId) => m_Collection.GetRpcCount(objectId);
     }
 }

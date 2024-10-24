@@ -43,7 +43,8 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator TrackRttMetricServerToClient()
         {
-            var waitForMetricValues = new WaitForGaugeMetricValues((m_ServerNetworkManager.NetworkMetrics as NetworkMetrics).Dispatcher, NetworkMetricTypes.RttToServer);
+            var dispatcher = new TestDispatcher((NetworkMetrics)m_ServerNetworkManager.NetworkMetrics);
+            var waitForMetricValues = new WaitForGaugeMetricValues(dispatcher, NetworkMetricTypes.RttToServer);
 
             using (var writer = new FastBufferWriter(sizeof(uint), Allocator.Temp))
             {
@@ -64,7 +65,8 @@ namespace Unity.Netcode.RuntimeTests.Metrics
             var clientGaugeMetricValues = new List<WaitForGaugeMetricValues>();
             foreach (var client in m_ClientNetworkManagers)
             {
-                clientGaugeMetricValues.Add(new WaitForGaugeMetricValues((client.NetworkMetrics as NetworkMetrics).Dispatcher, NetworkMetricTypes.RttToServer, metric => metric > 0f));
+                var dispatcher = new TestDispatcher((NetworkMetrics)client.NetworkMetrics);
+                clientGaugeMetricValues.Add(new WaitForGaugeMetricValues(dispatcher, NetworkMetricTypes.RttToServer, metric => metric > 0f));
             }
 
             using (var writer = new FastBufferWriter(sizeof(uint), Allocator.Temp))

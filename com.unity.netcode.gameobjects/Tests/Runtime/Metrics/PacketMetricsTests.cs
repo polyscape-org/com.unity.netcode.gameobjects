@@ -14,7 +14,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator TrackPacketSentMetric()
         {
-            var waitForMetricValues = new WaitForCounterMetricValue(ServerMetrics.Dispatcher, NetworkMetricTypes.PacketsSent, metric => metric > 0);
+            var waitForMetricValues = new WaitForCounterMetricValue(ServerMetricsDispatcher, NetworkMetricTypes.PacketsSent, metric => metric > 0);
 
             using (var writer = new FastBufferWriter(sizeof(uint), Allocator.Temp))
             {
@@ -31,7 +31,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator TrackPacketReceivedMetric()
         {
-            var waitForMetricValues = new WaitForCounterMetricValue(ClientMetrics.Dispatcher, NetworkMetricTypes.PacketsReceived, metric => metric > 0);
+            var waitForMetricValues = new WaitForCounterMetricValue(ClientMetricsDispatcher, NetworkMetricTypes.PacketsReceived, metric => metric > 0);
 
             using (var writer = new FastBufferWriter(sizeof(uint), Allocator.Temp))
             {

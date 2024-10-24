@@ -35,7 +35,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator TrackNetworkObjectSpawnSentMetric()
         {
-            var waitForMetricEvent = new WaitForEventMetricValues<ObjectSpawnedEvent>(ServerMetrics.Dispatcher, NetworkMetricTypes.ObjectSpawnedSent);
+            var waitForMetricEvent = new WaitForEventMetricValues<ObjectSpawnedEvent>(ServerMetricsDispatcher, NetworkMetricTypes.ObjectSpawnedSent);
 
             var spawnedObject = SpawnNetworkObject();
 
@@ -53,7 +53,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator TrackNetworkObjectSpawnReceivedMetric()
         {
-            var waitForMetricEvent = new WaitForEventMetricValues<ObjectSpawnedEvent>(ClientMetrics.Dispatcher, NetworkMetricTypes.ObjectSpawnedReceived);
+            var waitForMetricEvent = new WaitForEventMetricValues<ObjectSpawnedEvent>(ClientMetricsDispatcher, NetworkMetricTypes.ObjectSpawnedReceived);
 
             var networkObject = SpawnNetworkObject();
             yield return s_DefaultWaitForTick;
@@ -73,7 +73,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         [UnityTest]
         public IEnumerator TrackNetworkObjectDestroySentMetric()
         {
-            var waitForMetricEvent = new WaitForEventMetricValues<ObjectDestroyedEvent>(ServerMetrics.Dispatcher, NetworkMetricTypes.ObjectDestroyedSent);
+            var waitForMetricEvent = new WaitForEventMetricValues<ObjectDestroyedEvent>(ServerMetricsDispatcher, NetworkMetricTypes.ObjectDestroyedSent);
             var networkObject = SpawnNetworkObject();
             var objectName = networkObject.name;
 
@@ -99,7 +99,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
 
             yield return s_DefaultWaitForTick;
 
-            var waitForMetricEvent = new WaitForEventMetricValues<ObjectDestroyedEvent>(ClientMetrics.Dispatcher, NetworkMetricTypes.ObjectDestroyedReceived);
+            var waitForMetricEvent = new WaitForEventMetricValues<ObjectDestroyedEvent>(ClientMetricsDispatcher, NetworkMetricTypes.ObjectDestroyedReceived);
             var objectId = networkObject.NetworkObjectId;
             var objectName = s_GlobalNetworkObjects[1][objectId].name;
 
@@ -129,7 +129,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
 
             yield return s_DefaultWaitForTick;
 
-            var waitForMetricEvent = new WaitForEventMetricValues<ObjectSpawnedEvent>(ServerMetrics.Dispatcher, NetworkMetricTypes.ObjectSpawnedSent);
+            var waitForMetricEvent = new WaitForEventMetricValues<ObjectSpawnedEvent>(ServerMetricsDispatcher, NetworkMetricTypes.ObjectSpawnedSent);
 
             NetworkObject.NetworkShow(new List<NetworkObject> { networkObject1, networkObject2 }, Client.LocalClientId);
             yield return s_DefaultWaitForTick;
@@ -163,7 +163,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
 
             yield return s_DefaultWaitForTick;
 
-            var waitForMetricEvent = new WaitForEventMetricValues<ObjectDestroyedEvent>(ServerMetrics.Dispatcher, NetworkMetricTypes.ObjectDestroyedSent);
+            var waitForMetricEvent = new WaitForEventMetricValues<ObjectDestroyedEvent>(ServerMetricsDispatcher, NetworkMetricTypes.ObjectDestroyedSent);
 
             NetworkObject.NetworkHide(new List<NetworkObject> { networkObject1, networkObject2 }, Client.LocalClientId);
             yield return s_DefaultWaitForTick;
@@ -194,7 +194,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
         {
             SpawnNetworkObject();
 
-            var waitForGaugeValues = new WaitForGaugeMetricValues(ServerMetrics.Dispatcher, NetworkMetricTypes.NetworkObjects);
+            var waitForGaugeValues = new WaitForGaugeMetricValues(ServerMetricsDispatcher, NetworkMetricTypes.NetworkObjects);
 
             yield return s_DefaultWaitForTick;
             yield return waitForGaugeValues.WaitForMetricsReceived();
@@ -211,7 +211,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
             //By default, we have 2 network objects
             //There's a slight delay between the spawn on the server and the spawn on the client
             //We want to have metrics when the value is different than the 2 default one to confirm the client has the new value
-            var waitForGaugeValues = new WaitForGaugeMetricValues(ClientMetrics.Dispatcher, NetworkMetricTypes.NetworkObjects, metric => (int)metric != 2);
+            var waitForGaugeValues = new WaitForGaugeMetricValues(ClientMetricsDispatcher, NetworkMetricTypes.NetworkObjects, metric => (int)metric != 2);
 
             yield return waitForGaugeValues.WaitForMetricsReceived();
 
@@ -228,7 +228,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
                 objectList.ElementAt(i).Despawn();
             }
 
-            var waitForGaugeValues = new WaitForGaugeMetricValues(ServerMetrics.Dispatcher, NetworkMetricTypes.NetworkObjects);
+            var waitForGaugeValues = new WaitForGaugeMetricValues(ServerMetricsDispatcher, NetworkMetricTypes.NetworkObjects);
 
             yield return s_DefaultWaitForTick;
             yield return waitForGaugeValues.WaitForMetricsReceived();
@@ -243,7 +243,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
             var initialSpawnCount = Server.SpawnManager.SpawnedObjectsList.Count;
             var spawnedObjects = new List<GameObject>();
             //By default, we have 2 network objects and will have spawned 4 so we want to wait for metrics to tell us we have 6 spawned objects
-            var waitForGaugeValues = new WaitForGaugeMetricValues(ClientMetrics.Dispatcher, NetworkMetricTypes.NetworkObjects, metric => (int)metric == 6);
+            var waitForGaugeValues = new WaitForGaugeMetricValues(ClientMetricsDispatcher, NetworkMetricTypes.NetworkObjects, metric => (int)metric == 6);
 
             for (int i = 0; i < 4; i++)
             {
@@ -255,7 +255,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
             Assert.AreEqual(6, value);
 
             // Create a new gauge that waits for the initial spawned client count
-            waitForGaugeValues = new WaitForGaugeMetricValues(ClientMetrics.Dispatcher, NetworkMetricTypes.NetworkObjects, metric => (int)metric != 6);
+            waitForGaugeValues = new WaitForGaugeMetricValues(ClientMetricsDispatcher, NetworkMetricTypes.NetworkObjects, metric => (int)metric != 6);
 
             // Now despawn the 4 spawned objects
             foreach (var spawnedObject in spawnedObjects)
@@ -270,7 +270,7 @@ namespace Unity.Netcode.RuntimeTests.Metrics
             Assert.AreEqual(initialSpawnCount, value);
 
             // Create a new gauge that waits for the initial spawned client count
-            waitForGaugeValues = new WaitForGaugeMetricValues(ClientMetrics.Dispatcher, NetworkMetricTypes.NetworkObjects, metric => (int)metric == 0);
+            waitForGaugeValues = new WaitForGaugeMetricValues(ClientMetricsDispatcher, NetworkMetricTypes.NetworkObjects, metric => (int)metric == 0);
 
             // Now assure despawning players are being tracked too
             var spawnedPlayers = Server.SpawnManager.SpawnedObjectsList.ToList();

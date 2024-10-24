@@ -19,12 +19,7 @@ namespace Unity.Netcode.EditorTests.Metrics
         [Ignore("Disable test while we reevaluate the assumption that INetworkMetricEvent interfaces must be reported from MLAPI.")]
         public void ValidateThatAllMetricTypesAreRegistered(Type metricType)
         {
-            var dispatcher = new NetworkMetrics().Dispatcher as MetricDispatcher;
-            Assert.NotNull(dispatcher);
-
-            var collection = typeof(MetricDispatcher)
-                .GetField("m_Collection", BindingFlags.NonPublic | BindingFlags.Instance)?
-                .GetValue(dispatcher) as IMetricCollection;
+            var collection = new NetworkMetrics().Collector;
             Assert.NotNull(collection);
 
             Assert.That(

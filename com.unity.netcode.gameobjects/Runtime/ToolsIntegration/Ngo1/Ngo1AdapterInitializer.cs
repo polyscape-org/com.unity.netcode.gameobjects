@@ -24,11 +24,9 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
                 return;
             }
 
-            var metrics = new NetworkMetrics();
-            networkManager.NetworkMetrics = metrics;
-
             // metrics will notify the adapter directly
-            var ngo1Adapter = new Ngo1Adapter(networkManager, metrics.Dispatcher);
+            networkManager.NetworkMetrics = new NetworkMetrics();
+            var ngo1Adapter = new Ngo1Adapter(networkManager);
             NetworkAdapters.AddAdapter(ngo1Adapter);
 
             NetworkSolutionInterface.SetInterface(new NetworkSolutionInterfaceParameters
@@ -43,6 +41,7 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
             {
                 // We need to wait for the NetworkTickSystem to be ready as well
                 var newNetworkManager = await GetNetworkManagerAsync();
+                networkManager.NetworkMetrics = new NetworkMetrics();
                 ngo1Adapter.ReplaceNetworkManager(newNetworkManager);
             };
 
