@@ -17,7 +17,7 @@ namespace Unity.Netcode.TestHelpers.Runtime.Metrics
 
         public WaitForMetricValues(IMetricDispatcher dispatcher, DirectionalMetricInfo directionalMetricName)
         {
-            m_MetricName = directionalMetricName.Id;
+            m_MetricName = directionalMetricName.DirectedMetricType.ToString();
             dispatcher.RegisterObserver(this);
         }
 
