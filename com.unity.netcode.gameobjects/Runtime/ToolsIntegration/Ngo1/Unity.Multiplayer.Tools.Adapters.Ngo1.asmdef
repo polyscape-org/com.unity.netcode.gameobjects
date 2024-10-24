@@ -3,10 +3,8 @@
   "rootNamespace": "Unity.Multiplayer.Tools.Adapters.Ngo1",
   "references": [
     "Unity.Collections",
-    "Unity.Multiplayer.Tools.Dispatcher",
     "Unity.Netcode.Runtime",
     "Unity.Multiplayer.Tools.Interfaces",
-    "Unity.Multiplayer.Tools.Interfaces.MetricTypes", 
     "Unity.Multiplayer.Tools.MetricCollection",
     "Unity.Multiplayer.Tools.BuiltInMetrics",
     "Unity.Multiplayer.Tools.ReaderWriters"

@@ -1255,8 +1255,9 @@ namespace Unity.Netcode
             // UnityTransport dependencies are then initialized
             RealTimeProvider = ComponentFactory.Create<IRealTimeProvider>(this);
 
-
-           // TODO:TIPHAINE MetricsManager.Initialize(this);
+            #if MULTIPLAYER_TOOLS
+            NetworkMetrics = ComponentFactory.Create<INetworkMetrics>(this);
+            #endif
 
             {
                 MessageManager = new NetworkMessageManager(new DefaultMessageSender(this), this);

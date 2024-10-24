@@ -50,15 +50,11 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
         private void Init(NetworkManager networkManager)
         {
             m_NetworkManager = networkManager;
-            if(m_NetworkManager.NetworkMetrics is NetworkMetrics nm)
-            {
-                m_Collection = nm.Collector;
-                nm.OnMetricsDispatched += NotifyObservers;
-            }
-            else
-            {
-                Debug.LogWarning("Ngo1Adapter: NetworkMetrics is either null or not of the expected type. Either make sure it is set properly or check the adapter implementation.");
-            }
+
+            NetworkMetrics nwMetrics = GetOrAddNetworkMetrics();
+            m_Collection = nwMetrics.Collector;
+            nwMetrics.OnMetricsDispatched += NotifyObservers;
+
             m_NetworkManager.OnConnectionEvent += OnConnectionEvent;
             m_NetworkManager.NetworkTickSystem.Tick += OnTick;
 
@@ -104,6 +100,7 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
                 nm.OnMetricsDispatched -= NotifyObservers;
             }
 
+            m_NetworkManager.NetworkMetrics = null;
             m_NetworkManager = null;
             m_Collection = null;
         }
@@ -296,9 +293,24 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
             => m_Collection.GetBandwidth(objectId, bandwidthTypes, networkDirection);
 
         // IGetRpcCount
+
         // --------------------------------------------------------------------
+
         public event Action OnRpcCountUpdated;
 
         public int GetRpcCount(ObjectId objectId) => m_Collection.GetRpcCount(objectId);
+
+        private NetworkMetrics GetOrAddNetworkMetrics()
+        {
+            if (m_NetworkManager.NetworkMetrics is NetworkMetrics nm)
+            {
+                nm.OnMetricsDispatched -= NotifyObservers;
+                return nm;
+            }
+
+            var nwMetrics = new NetworkMetrics();
+            m_NetworkManager.NetworkMetrics = nwMetrics;
+            return nwMetrics;
+        }
     }
 }

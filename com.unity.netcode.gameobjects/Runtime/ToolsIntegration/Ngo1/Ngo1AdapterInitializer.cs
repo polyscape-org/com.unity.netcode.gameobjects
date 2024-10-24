@@ -12,20 +12,15 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
         [RuntimeInitializeOnLoadMethod]
         private static void InitializeAdapter()
         {
+            ComponentFactory.Register<INetworkMetrics>((nm) => nm.NetworkMetrics = new NetworkMetrics());
             InitializeAdapterAsync().Forget();
         }
 
         private static async Task InitializeAdapterAsync()
         {
             var networkManager = await GetNetworkManagerAsync();
-            if(networkManager.NetworkMetrics is NetworkMetrics)
-            {
-                Debug.LogWarning("Ngo1AdapterInitializer: NetworkMetrics already initialized. Skipping initialization.");
-                return;
-            }
 
             // metrics will notify the adapter directly
-            networkManager.NetworkMetrics = new NetworkMetrics();
             var ngo1Adapter = new Ngo1Adapter(networkManager);
             NetworkAdapters.AddAdapter(ngo1Adapter);
 
@@ -41,7 +36,6 @@ namespace Unity.Multiplayer.Tools.Adapters.Ngo1
             {
                 // We need to wait for the NetworkTickSystem to be ready as well
                 var newNetworkManager = await GetNetworkManagerAsync();
-                networkManager.NetworkMetrics = new NetworkMetrics();
                 ngo1Adapter.ReplaceNetworkManager(newNetworkManager);
             };
 
