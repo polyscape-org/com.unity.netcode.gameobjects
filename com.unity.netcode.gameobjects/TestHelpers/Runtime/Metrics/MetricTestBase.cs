@@ -30,10 +30,10 @@ namespace Unity.Netcode.TestHelpers.Runtime.Metrics
         protected override IEnumerator OnStartedServerAndClients()
         {
             ServerMetrics = Server.NetworkMetrics as NetworkMetrics;
-            ServerMetricsDispatcher = new TestDispatcher(ServerMetrics);
             ClientMetrics = Client.NetworkMetrics as NetworkMetrics;
-            ClientMetricsDispatcher = new TestDispatcher(ClientMetrics);
             yield return base.OnStartedServerAndClients();
+            ServerMetricsDispatcher = new TestDispatcher(ServerMetrics);
+            ClientMetricsDispatcher = new TestDispatcher(ClientMetrics);
         }
     }
 
@@ -70,12 +70,12 @@ namespace Unity.Netcode.TestHelpers.Runtime.Metrics
         protected override IEnumerator OnStartedServerAndClients()
         {
             ServerMetrics = Server.NetworkMetrics as NetworkMetrics;
-            ServerMetricsDispatcher = new TestDispatcher(ServerMetrics);
             FirstClientMetrics = FirstClient.NetworkMetrics as NetworkMetrics;
-            FirstClientMetricsDispatcher = new TestDispatcher(FirstClientMetrics);
             SecondClientMetrics = SecondClient.NetworkMetrics as NetworkMetrics;
-            SecondClientMetricsDispatcher = new TestDispatcher(SecondClientMetrics);
             yield return base.OnStartedServerAndClients();
+            ServerMetricsDispatcher = new TestDispatcher(ServerMetrics);
+            FirstClientMetricsDispatcher = new TestDispatcher(FirstClientMetrics);
+            SecondClientMetricsDispatcher = new TestDispatcher(SecondClientMetrics);
         }
     }
 

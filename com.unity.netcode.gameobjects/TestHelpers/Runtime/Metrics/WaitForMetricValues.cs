@@ -73,7 +73,7 @@ namespace Unity.Netcode.TestHelpers.Runtime.Metrics
             if (metric == default)
             {
                 m_HasError = true;
-                m_Error = $"Metric collection does not contain metric named '{m_MetricName}'.";
+                m_Error = $"Metric collection does not contain metric named '{m_MetricName}'. Collection contains: {string.Join(",", collection.Metrics.Select(x => x.Name))}";
 
                 return false;
             }

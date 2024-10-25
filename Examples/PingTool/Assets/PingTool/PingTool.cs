@@ -17,7 +17,7 @@ namespace Unity.Netcode.Examples.PingTool
     public class PingTool : NetworkBehaviour
     {
         #region PUBLIC PROPERTIES
-        /// Note: Sending anything beyond 100 pings per second (100HZ) is only going to congest the 
+        /// Note: Sending anything beyond 100 pings per second (100HZ) is only going to congest the
         /// reliable pipeline. If the client is locked at a fixed frame rate (i.e.60HZ) then it will
         /// send 1 ping per frame and will wait for 100 frames to reconcile the values and populate
         /// each client's <see cref="ClientRtt"/> entry.
@@ -112,7 +112,7 @@ namespace Unity.Netcode.Examples.PingTool
 
         private void InitializeAllClients()
         {
-            // Register to get the UTP RTT to the server or service and to get frame times            
+            // Register to get the UTP RTT to the server or service and to get frame times
             AddClientStats(NetworkManager.LocalClientId);
             // Server does not need to update its RTT to itself
             if (!NetworkManager.IsServer)
@@ -298,7 +298,7 @@ namespace Unity.Netcode.Examples.PingTool
         }
 
         /// <summary>
-        /// Helper coroutine to prevent from sending every micro-adjustment to 
+        /// Helper coroutine to prevent from sending every micro-adjustment to
         /// the ping rate value. Once the user has stopped changing the slider
         /// then the clients will be notified of the change and the local authority
         /// will reset its inbound client queues.
@@ -562,7 +562,7 @@ namespace Unity.Netcode.Examples.PingTool
                 clientDisplayElements.FrameRate.CounterConfiguration.SignificantDigits = 3;
                 clientDisplayElements.FrameRate.CounterConfiguration.SimpleMovingAverageParams.SampleCount = Application.targetFrameRate;
                 clientDisplayElements.FrameRate.CounterConfiguration.SimpleMovingAverageParams.SampleRate = SampleRate.PerSecond;
-                clientDisplayElements.FrameRate.Stats.Add(MetricId.Create(PingToolMetrics.FrameRate));
+                clientDisplayElements.FrameRate.Stats.Add(MetricIdExtensions.Create(PingToolMetrics.FrameRate));
                 m_NetStatsMonitor.Configuration.DisplayElements.Add(clientDisplayElements.FrameRate);
             }
 
@@ -587,7 +587,7 @@ namespace Unity.Netcode.Examples.PingTool
                 clientDisplayElements.RTT.CounterConfiguration.SignificantDigits = 3;
                 clientDisplayElements.RTT.CounterConfiguration.SimpleMovingAverageParams.SampleCount = PingRate;
                 clientDisplayElements.RTT.CounterConfiguration.SimpleMovingAverageParams.SampleRate = SampleRate.PerSecond;
-                clientDisplayElements.RTT.Stats.Add(MetricId.Create(PingToolMetrics.RTT));
+                clientDisplayElements.RTT.Stats.Add(MetricIdExtensions.Create(PingToolMetrics.RTT));
                 m_NetStatsMonitor.Configuration.DisplayElements.Add(clientDisplayElements.RTT);
             }
 
@@ -604,7 +604,7 @@ namespace Unity.Netcode.Examples.PingTool
                 clientDisplayElements.Ping.CounterConfiguration.SignificantDigits = 3;
                 clientDisplayElements.Ping.CounterConfiguration.SimpleMovingAverageParams.SampleCount = PingRate;
                 clientDisplayElements.Ping.CounterConfiguration.SimpleMovingAverageParams.SampleRate = SampleRate.PerSecond;
-                clientDisplayElements.Ping.Stats.Add(MetricId.Create(PingToolMetrics.Ping));
+                clientDisplayElements.Ping.Stats.Add(MetricIdExtensions.Create(PingToolMetrics.Ping));
                 m_NetStatsMonitor.Configuration.DisplayElements.Add(clientDisplayElements.Ping);
             }
 
@@ -671,7 +671,7 @@ namespace Unity.Netcode.Examples.PingTool
             {
                 return;
             }
-            m_NetStatsMonitor.AddCustomValue(MetricId.Create(metricType), value);
+            m_NetStatsMonitor.AddCustomValue(MetricIdExtensions.Create(metricType), value);
         }
 #endif
         #endregion
