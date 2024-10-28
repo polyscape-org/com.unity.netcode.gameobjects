@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
 
@@ -9,7 +10,8 @@ namespace Unity.Netcode
     /// </summary>
     /// <typeparam name="T">The type for the list</typeparam>
     [GenerateSerializationForGenericParameter(0)]
-    public class NetworkList<T> : NetworkVariableBase where T : unmanaged, IEquatable<T>
+    public class NetworkList<T> : NetworkVariableBase, IReadOnlyList<T>
+        where T : unmanaged, IEquatable<T>
     {
         private NativeList<T> m_List = new NativeList<T>(64, Allocator.Persistent);
         private NativeList<NetworkListEvent<T>> m_DirtyEvents = new NativeList<NetworkListEvent<T>>(64, Allocator.Persistent);
@@ -48,6 +50,12 @@ namespace Unity.Netcode
                     m_List.Add(value);
                 }
             }
+        }
+
+        public NativeArray<T1> ToNativeArray<T1>()
+            where T1 : struct
+        {
+            return m_List.AsArray().Reinterpret<T1>();
         }
 
         /// <inheritdoc />
@@ -627,6 +635,11 @@ namespace Unity.Netcode
             m_List.Dispose();
             m_DirtyEvents.Dispose();
             base.Dispose();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 

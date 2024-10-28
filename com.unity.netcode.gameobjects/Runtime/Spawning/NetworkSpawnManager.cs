@@ -304,17 +304,37 @@ namespace Unity.Netcode
         /// </summary>
         public NetworkManager NetworkManager { get; }
 
-        internal readonly Queue<ReleasedNetworkId> ReleasedNetworkObjectIds = new Queue<ReleasedNetworkId>();
-        private ulong m_NetworkObjectIdCounter;
+        internal readonly List<ReleasedNetworkId> ReleasedNetworkObjectIds = new List<ReleasedNetworkId>();
+        private ulong m_NetworkObjectIdCounter = 1;
 
         // A list of target ClientId, use when sending despawn commands. Kept as a member to reduce memory allocations
         private List<ulong> m_TargetClientIds = new List<ulong>();
 
+        public void ReservedNetworkObjectId(ulong networkObjectId)
+        {
+            ReleasedNetworkObjectIds.RemoveAll(x => x.NetworkId == networkObjectId);
+            for (var i = m_NetworkObjectIdCounter; i < networkObjectId; i++)
+            {
+                ReleasedNetworkObjectIds.Add(new ReleasedNetworkId
+                {
+                    NetworkId = i,
+                    ReleaseTime = NetworkManager.RealTimeProvider.UnscaledTime
+                });
+            }
+
+            m_NetworkObjectIdCounter = Math.Max(m_NetworkObjectIdCounter, networkObjectId);
+        }
+
         internal ulong GetNetworkObjectId()
         {
-            if (ReleasedNetworkObjectIds.Count > 0 && NetworkManager.NetworkConfig.RecycleNetworkIds && (NetworkManager.RealTimeProvider.UnscaledTime - ReleasedNetworkObjectIds.Peek().ReleaseTime) >= NetworkManager.NetworkConfig.NetworkIdRecycleDelay)
+            if (ReleasedNetworkObjectIds.Count > 0 && NetworkManager.NetworkConfig.RecycleNetworkIds && (NetworkManager.RealTimeProvider.UnscaledTime - ReleasedNetworkObjectIds.Last().ReleaseTime) >= NetworkManager.NetworkConfig.NetworkIdRecycleDelay)
             {
-                return ReleasedNetworkObjectIds.Dequeue().NetworkId;
+                var lastReleased = ReleasedNetworkObjectIds.Last();
+                if (NetworkManager.RealTimeProvider.UnscaledTime - lastReleased.ReleaseTime >= NetworkManager.NetworkConfig.NetworkIdRecycleDelay)
+                {
+                    ReleasedNetworkObjectIds.RemoveAt(ReleasedNetworkObjectIds.Count - 1);
+                    return lastReleased.NetworkId;
+                }
             }
 
             m_NetworkObjectIdCounter++;
@@ -686,7 +706,7 @@ namespace Unity.Netcode
         /// <param name="position">The starting poisiton of the <see cref="NetworkObject"/> instance.</param>
         /// <param name="rotation">The starting rotation of the <see cref="NetworkObject"/> instance.</param>
         /// <returns>The newly instantiated and spawned <see cref="NetworkObject"/> prefab instance.</returns>
-        public NetworkObject InstantiateAndSpawn(NetworkObject networkPrefab, ulong ownerClientId = NetworkManager.ServerClientId, bool destroyWithScene = false, bool isPlayerObject = false, bool forceOverride = false, Vector3 position = default, Quaternion rotation = default)
+        public NetworkObject InstantiateAndSpawn(NetworkObject networkPrefab, ulong ownerClientId = NetworkManager.ServerClientId, bool destroyWithScene = false, bool isPlayerObject = false, bool forceOverride = false, Vector3 position = default, Quaternion rotation = default, ulong? overrideNetworkObjectId = null)
         {
             if (networkPrefab == null)
             {
@@ -715,13 +735,13 @@ namespace Unity.Netcode
                 return null;
             }
 
-            return InstantiateAndSpawnNoParameterChecks(networkPrefab, ownerClientId, destroyWithScene, isPlayerObject, forceOverride, position, rotation);
+            return InstantiateAndSpawnNoParameterChecks(networkPrefab, ownerClientId, destroyWithScene, isPlayerObject, forceOverride, position, rotation, overrideNetworkObjectId);
         }
 
         /// <summary>
         /// !!! Does not perform any parameter checks prior to attempting to instantiate and spawn the NetworkObject !!!
         /// </summary>
-        internal NetworkObject InstantiateAndSpawnNoParameterChecks(NetworkObject networkPrefab, ulong ownerClientId = NetworkManager.ServerClientId, bool destroyWithScene = false, bool isPlayerObject = false, bool forceOverride = false, Vector3 position = default, Quaternion rotation = default)
+        internal NetworkObject InstantiateAndSpawnNoParameterChecks(NetworkObject networkPrefab, ulong ownerClientId = NetworkManager.ServerClientId, bool destroyWithScene = false, bool isPlayerObject = false, bool forceOverride = false, Vector3 position = default, Quaternion rotation = default, ulong? overrideNetworkObjectId = null)
         {
             var networkObject = networkPrefab;
             // Host spawns the ovveride and server spawns the original prefab unless forceOverride is set to true where both server or host will spawn the override.
@@ -738,12 +758,12 @@ namespace Unity.Netcode
             networkObject.IsPlayerObject = isPlayerObject;
             networkObject.transform.position = position;
             networkObject.transform.rotation = rotation;
-            networkObject.SpawnWithOwnership(ownerClientId, destroyWithScene);
+            networkObject.SpawnWithOwnership(ownerClientId, destroyWithScene, overrideNetworkObjectId);
             return networkObject;
         }
 
         /// <summary>
-        /// Gets the right NetworkObject prefab instance to spawn. If a handler is registered or there is an override assigned to the 
+        /// Gets the right NetworkObject prefab instance to spawn. If a handler is registered or there is an override assigned to the
         /// passed in globalObjectIdHash value, then that is what will be instantiated, spawned, and returned.
         /// </summary>
         internal NetworkObject GetNetworkObjectToSpawn(uint globalObjectIdHash, ulong ownerId, Vector3? position, Quaternion? rotation, bool isScenePlaced = false)
@@ -775,8 +795,8 @@ namespace Unity.Netcode
                         case NetworkPrefabOverride.Hash:
                         case NetworkPrefabOverride.Prefab:
                             {
-                                // When scene management is disabled and this is an in-scene placed NetworkObject, we want to always use the 
-                                // SourcePrefabToOverride and not any possible prefab override as a user might want to spawn overrides dynamically 
+                                // When scene management is disabled and this is an in-scene placed NetworkObject, we want to always use the
+                                // SourcePrefabToOverride and not any possible prefab override as a user might want to spawn overrides dynamically
                                 // but might want to use the same source network prefab as an in-scene placed NetworkObject.
                                 // (When scene management is enabled, clients don't delete their in-scene placed NetworkObjects prior to dynamically
                                 // spawning them so the original prefab placed is preserved and this is not needed)
@@ -949,7 +969,7 @@ namespace Unity.Netcode
         /// - NetworkObject when spawning a newly instantiated NetworkObject for the first time.
         /// - NetworkSceneManager after a server/session-owner has loaded a scene to locally spawn the newly instantiated in-scene placed NetworkObjects.
         /// - NetworkSpawnManager when spawning any already loaded in-scene placed NetworkObjects (client-server or session owner).
-        /// 
+        ///
         /// Client-Server:
         /// Server is the only instance that invokes this method.
         ///
@@ -1321,7 +1341,7 @@ namespace Unity.Netcode
                             }
                         }
 
-                        // If spawned, then despawn and potentially destroy. 
+                        // If spawned, then despawn and potentially destroy.
                         if (networkObjects[i].IsSpawned)
                         {
                             OnDespawnObject(networkObjects[i], shouldDestroy);
@@ -1487,7 +1507,7 @@ namespace Unity.Netcode
             {
                 if (NetworkManager.NetworkConfig.RecycleNetworkIds)
                 {
-                    ReleasedNetworkObjectIds.Enqueue(new ReleasedNetworkId()
+                    ReleasedNetworkObjectIds.Add(new ReleasedNetworkId()
                     {
                         NetworkId = networkObject.NetworkObjectId,
                         ReleaseTime = NetworkManager.RealTimeProvider.UnscaledTime
@@ -1757,7 +1777,7 @@ namespace Unity.Netcode
             // DANGO-TODO-MVP: Remove the session owner object distribution check once the service handles object distribution
             if (NetworkManager.DistributedAuthorityMode && (NetworkManager.DAHost || NetworkManager.CMBServiceConnection))
             {
-                // DA-NGO CMB SERVICE NOTES: 
+                // DA-NGO CMB SERVICE NOTES:
                 // The most basic object distribution should be broken up into a table of spawned object types
                 // where each type contains a list of each client's owned objects of that type that can be
                 // distributed.
@@ -1776,7 +1796,7 @@ namespace Unity.Netcode
 
                 var clientCount = NetworkManager.ConnectedClientsIds.Count;
 
-                // Cycle through each prefab type 
+                // Cycle through each prefab type
                 foreach (var objectTypeEntry in distributedNetworkObjects)
                 {
                     // Calculate the number of objects that should be distributed amongst the clients
@@ -1846,7 +1866,7 @@ namespace Unity.Netcode
                     objectTypeCount.Clear();
                     GetObjectDistribution(ref distributedNetworkObjects, ref objectTypeCount);
                     builder.AppendLine($"Client Relative Distributed Object Count: (distribution follows)");
-                    // Cycle through each prefab type 
+                    // Cycle through each prefab type
                     foreach (var objectTypeEntry in distributedNetworkObjects)
                     {
                         builder.AppendLine($"[GID: {objectTypeEntry.Key} | {objectTypeEntry.Value.First().Value.First().name}][Total Count: {objectTypeCount[objectTypeEntry.Key]}]");

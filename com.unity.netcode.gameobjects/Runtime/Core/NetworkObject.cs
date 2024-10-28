@@ -1546,7 +1546,7 @@ namespace Unity.Netcode
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void SpawnInternal(bool destroyWithScene, ulong ownerClientId, bool playerObject)
+        internal void SpawnInternal(bool destroyWithScene, ulong ownerClientId, bool playerObject, ulong? overrideNetworkObjectId = null)
         {
             if (NetworkManagerOwner == null)
             {
@@ -1591,7 +1591,17 @@ namespace Unity.Netcode
                 }
             }
 
-            NetworkManager.SpawnManager.SpawnNetworkObjectLocally(this, NetworkManager.SpawnManager.GetNetworkObjectId(), IsSceneObject.HasValue && IsSceneObject.Value, playerObject, ownerClientId, destroyWithScene);
+            ulong networkId;
+            if (overrideNetworkObjectId != null)
+            {
+                networkId = overrideNetworkObjectId.Value;
+                NetworkManager.SpawnManager.ReservedNetworkObjectId(networkId);
+            }
+            else
+            {
+                networkId = NetworkManager.SpawnManager.GetNetworkObjectId();
+            }
+            NetworkManager.SpawnManager.SpawnNetworkObjectLocally(this, networkId, IsSceneObject.HasValue && IsSceneObject.Value, playerObject, ownerClientId, destroyWithScene);
 
             if ((NetworkManager.DistributedAuthorityMode && NetworkManager.DAHost) || (!NetworkManager.DistributedAuthorityMode && NetworkManager.IsServer))
             {
@@ -1635,7 +1645,7 @@ namespace Unity.Netcode
         /// <param name="position">The starting poisiton of the <see cref="NetworkObject"/> instance.</param>
         /// <param name="rotation">The starting rotation of the <see cref="NetworkObject"/> instance.</param>
         /// <returns>The newly instantiated and spawned <see cref="NetworkObject"/> prefab instance.</returns>
-        public static NetworkObject InstantiateAndSpawn(GameObject networkPrefab, NetworkManager networkManager, ulong ownerClientId = NetworkManager.ServerClientId, bool destroyWithScene = false, bool isPlayerObject = false, bool forceOverride = false, Vector3 position = default, Quaternion rotation = default)
+        public static NetworkObject InstantiateAndSpawn(GameObject networkPrefab, NetworkManager networkManager, ulong ownerClientId = NetworkManager.ServerClientId, bool destroyWithScene = false, bool isPlayerObject = false, bool forceOverride = false, Vector3 position = default, Quaternion rotation = default, ulong? overrideNetworkObjectId = null)
         {
             var networkObject = networkPrefab.GetComponent<NetworkObject>();
             if (networkObject == null)
@@ -1643,7 +1653,7 @@ namespace Unity.Netcode
                 Debug.LogError($"The {nameof(NetworkPrefab)} {networkPrefab.name} does not have a {nameof(NetworkObject)} component!");
                 return null;
             }
-            return networkObject.InstantiateAndSpawn(networkManager, ownerClientId, destroyWithScene, isPlayerObject, forceOverride, position, rotation);
+            return networkObject.InstantiateAndSpawn(networkManager, ownerClientId, destroyWithScene, isPlayerObject, forceOverride, position, rotation, overrideNetworkObjectId);
         }
 
         /// <summary>
@@ -1658,7 +1668,7 @@ namespace Unity.Netcode
         /// <param name="position">The starting poisiton of the <see cref="NetworkObject"/> instance.</param>
         /// <param name="rotation">The starting rotation of the <see cref="NetworkObject"/> instance.</param>
         /// <returns>The newly instantiated and spawned <see cref="NetworkObject"/> prefab instance.</returns>
-        public NetworkObject InstantiateAndSpawn(NetworkManager networkManager, ulong ownerClientId = NetworkManager.ServerClientId, bool destroyWithScene = false, bool isPlayerObject = false, bool forceOverride = false, Vector3 position = default, Quaternion rotation = default)
+        public NetworkObject InstantiateAndSpawn(NetworkManager networkManager, ulong ownerClientId = NetworkManager.ServerClientId, bool destroyWithScene = false, bool isPlayerObject = false, bool forceOverride = false, Vector3 position = default, Quaternion rotation = default, ulong? overrideNetworkObjectId = null)
         {
             if (networkManager == null)
             {
@@ -1693,17 +1703,17 @@ namespace Unity.Netcode
                 return null;
             }
 
-            return networkManager.SpawnManager.InstantiateAndSpawnNoParameterChecks(this, ownerClientId, destroyWithScene, isPlayerObject, forceOverride, position, rotation);
+            return networkManager.SpawnManager.InstantiateAndSpawnNoParameterChecks(this, ownerClientId, destroyWithScene, isPlayerObject, forceOverride, position, rotation, overrideNetworkObjectId);
         }
 
         /// <summary>
         /// Spawns this <see cref="NetworkObject"/> across the network. Can only be called from the Server
         /// </summary>
         /// <param name="destroyWithScene">Should the object be destroyed when the scene is changed</param>
-        public void Spawn(bool destroyWithScene = false)
+        public void Spawn(bool destroyWithScene = false, ulong? overrideNetworkObjectId = null)
         {
             var clientId = NetworkManager.DistributedAuthorityMode ? NetworkManager.LocalClientId : NetworkManager.ServerClientId;
-            SpawnInternal(destroyWithScene, clientId, false);
+            SpawnInternal(destroyWithScene, clientId, false, overrideNetworkObjectId);
         }
 
         /// <summary>
@@ -1711,9 +1721,9 @@ namespace Unity.Netcode
         /// </summary>
         /// <param name="clientId">The clientId to own the object</param>
         /// <param name="destroyWithScene">Should the object be destroyed when the scene is changed</param>
-        public void SpawnWithOwnership(ulong clientId, bool destroyWithScene = false)
+        public void SpawnWithOwnership(ulong clientId, bool destroyWithScene = false, ulong? overrideNetworkObjectId = null)
         {
-            SpawnInternal(destroyWithScene, clientId, false);
+            SpawnInternal(destroyWithScene, clientId, false, overrideNetworkObjectId);
         }
 
         /// <summary>
