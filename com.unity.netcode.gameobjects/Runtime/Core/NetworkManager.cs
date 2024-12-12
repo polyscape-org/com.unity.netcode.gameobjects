@@ -416,7 +416,7 @@ namespace Unity.Netcode
                         // Metrics update needs to be driven by NetworkConnectionManager's update to assure metrics are dispatched after the send queue is processed.
                         MetricsManager.UpdateMetrics();
 
-                        // Handle sending any pending transport messages 
+                        // Handle sending any pending transport messages
                         NetworkConfig.NetworkTransport.PostLateUpdate();
 
                         // TODO: Determine a better way to handle this

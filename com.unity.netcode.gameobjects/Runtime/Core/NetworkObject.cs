@@ -182,7 +182,7 @@ namespace Unity.Netcode
         /// <remarks>
         /// InContext: Typically means a are in prefab edit mode for an in-scene placed network prefab instance.
         /// (currently no such thing as a network prefab with nested network prefab instances)
-        /// 
+        ///
         /// InIsolation: Typically means we are in prefb edit mode for a prefab asset.
         /// </remarks>
         /// <param name="prefabStage"></param>
