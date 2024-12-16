@@ -298,14 +298,11 @@ namespace Unity.Netcode.Components
             }
         }
 
-#endif
-
         /// <summary>
         /// Creates the TransitionStateInfoList table
         /// </summary>
         private void BuildTransitionStateInfoList()
         {
-#if UNITY_EDITOR
             if (m_Animator == null)
             {
                 return;
@@ -323,8 +320,17 @@ namespace Unity.Netcode.Components
                 var stateMachine = animatorController.layers[x].stateMachine;
                 ParseStateMachineStates(x, ref animatorController, ref stateMachine);
             }
-#endif
         }
+
+        /// <summary>
+        /// In-Editor Only
+        /// Virtual OnValidate method for custom derived NetworkAnimator classes.
+        /// </summary>
+        protected virtual void OnValidate()
+        {
+            BuildTransitionStateInfoList();
+        }
+#endif
 
         public void OnAfterDeserialize()
         {
@@ -333,7 +339,7 @@ namespace Unity.Netcode.Components
 
         public void OnBeforeSerialize()
         {
-            BuildTransitionStateInfoList();
+            // Do nothing when serializing (handled during OnValidate)
         }
 
         internal struct AnimationState : INetworkSerializable
