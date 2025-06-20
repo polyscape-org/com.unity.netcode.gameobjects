@@ -1094,7 +1094,7 @@ namespace Unity.Netcode
 
             if (!NetworkManagerCheckForParent())
             {
-                DontDestroyOnLoad(gameObject);
+                // DontDestroyOnLoad(gameObject);
             }
         }
 
