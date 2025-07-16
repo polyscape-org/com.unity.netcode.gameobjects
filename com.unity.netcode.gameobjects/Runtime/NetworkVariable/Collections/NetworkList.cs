@@ -61,7 +61,7 @@ namespace Unity.Netcode
         {
             return m_List.AsArray().Reinterpret<T1>();
         }
-        
+
         /// <inheritdoc />
         public override void ResetDirty()
         {
@@ -573,6 +573,10 @@ namespace Unity.Netcode
                 }
 
                 var previousValue = m_List[index];
+                if (value.Equals(previousValue))
+                {
+                    return;
+                }
                 m_List[index] = value;
 
                 var listEvent = new NetworkListEvent<T>()
