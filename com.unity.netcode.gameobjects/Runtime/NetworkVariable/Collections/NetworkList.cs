@@ -618,6 +618,12 @@ namespace Unity.Netcode
                 }
 
                 var previousValue = m_List[index];
+
+                if (previousValue.Equals(value))
+                {
+                    return;
+                }
+
                 m_List[index] = value;
 
                 var listEvent = new NetworkListEvent<T>()
