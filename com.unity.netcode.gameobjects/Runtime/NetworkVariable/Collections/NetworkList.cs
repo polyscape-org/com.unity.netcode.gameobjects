@@ -88,7 +88,7 @@ namespace Unity.Netcode
         public override void WriteDelta(FastBufferWriter writer)
         {
 
-            if (base.IsDirty())
+            if (base.IsDirty() || true)
             {
                 writer.WriteValueSafe((ushort)1);
                 writer.WriteValueSafe(NetworkListEvent<T>.EventType.Full);
